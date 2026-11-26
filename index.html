@@ -143,6 +143,7 @@ footer li{padding:4px 0;border-bottom:1px solid rgba(231,237,233,.09);font-size:
 .legend span{display:inline-flex;align-items:center;gap:6px}
 .legend i{width:10px;height:10px;border-radius:50%;background:var(--accent);display:inline-block}
 .legend i.hollow{background:var(--card);border:1.6px solid var(--accent)}
+.legend b{color:var(--text);font-weight:500}
 .legend i.diamond{background:none;border:1.6px solid var(--amber);border-radius:0;transform:rotate(45deg)}
 .node rect{fill:none;stroke:var(--amber);stroke-width:1.7}
 .node.on rect{fill:rgba(214,166,75,.28)}
@@ -182,7 +183,7 @@ footer li{padding:4px 0;border-bottom:1px solid rgba(231,237,233,.09);font-size:
       <div class="stat"><div class="n" id="s-org">—</div><div class="k">组织 / 机构</div></div>
       <div class="stat"><div class="n" id="s-city">—</div><div class="k">城市</div></div>
       <div class="stat"><div class="n" id="s-cc">—</div><div class="k">国家 / 地区</div></div>
-      <div class="stat"><div class="n" id="s-st">—</div><div class="k">有街道级坐标</div></div>
+      <div class="stat"><div class="n" id="s-st">—</div><div class="k">办公落点（含多址机构）</div></div>
     </div>
   </div>
 </header>
@@ -218,7 +219,8 @@ footer li{padding:4px 0;border-bottom:1px solid rgba(231,237,233,.09);font-size:
     <div class="legend">
       <span><i></i> 有街道级坐标的城市</span>
       <span><i class="hollow"></i> 仅有城市级坐标</span>
-      <span>圆点大小 / 数字 = 该城组织数量</span>
+      <span>圆点大小 / 数字 = 该城办公落点数量</span>
+      <span>街道级坐标 <b class="mono" id="s-street">—</b> · 城市级 <b class="mono" id="s-citylv">—</b></span>
       <span>低倍视图下重叠的圆点会自动错开，放大后回到真实坐标</span>
       <span id="leg-node" style="display:none"><i class="diamond"></i> 通道节点（原稿所述，行政级坐标）</span>
     </div>
@@ -227,7 +229,7 @@ footer li{padding:4px 0;border-bottom:1px solid rgba(231,237,233,.09);font-size:
   <section class="ledger" aria-label="组织名录">
     <div class="ledger-head">
       <h2>组织名录</h2>
-      <p>成立年份、负责人、公开地址与坐标。† = 取自世界维吾尔代表大会附属组织名录（未标日期，可能已换届）；△ = 公开报道互相矛盾。点击任意行可在地图上定位。</p>
+      <p>成立年份、负责人、公开地址与坐标。† = 取自世界维吾尔代表大会附属组织名录（未标日期，可能已换届）；△ = 公开报道互相矛盾。点击任意行可在地图上定位。表内每个组织一行；世界维吾尔代表大会（慕尼黑 / 柏林 / 布鲁塞尔）与 Gökbayrak（开塞利 / 安卡拉）为多址机构，此处只列主址，各址坐标见城市面板。</p>
     </div>
     <div class="table-scroll">
       <table id="table">
@@ -323,7 +325,10 @@ const RNAME = {na:"北美",eu:"欧洲",tr:"土耳其",ca:"中亚",apac:"亚太"}
 document.getElementById('s-org').textContent = ORGS.length;
 document.getElementById('s-city').textContent = cityList.length;
 document.getElementById('s-cc').textContent = new Set(ORGS.flatMap(o=>(o.sites||[]).map(s=>CITIES[s.city]?.cc)).filter(Boolean)).size;
-document.getElementById('s-st').textContent = ORGS.flatMap(o=>o.sites||[]).filter(s=>s.prec==='street').length;
+const ALLSITES = ORGS.flatMap(o=>o.sites||[]);
+document.getElementById('s-st').textContent = ALLSITES.length;
+document.getElementById('s-street').textContent = ALLSITES.filter(s=>s.prec==='street').length;
+document.getElementById('s-citylv').textContent = ALLSITES.filter(s=>s.prec==='city').length;
 
 /* ---------- graticule ---------- */
 (function(){
@@ -520,7 +525,7 @@ function renderPanel(key){
   if(!key){
     panel.innerHTML = `<div class="panel-head"><div class="panel-eyebrow">City index</div>
       <h2 class="panel-title">按城市浏览</h2>
-      <div class="panel-sub">${cityList.length} 座城市 · 由多到少</div></div>
+      <div class="panel-sub">${cityList.length} 座城市 · ${ALLSITES.length} 个办公落点 · ${ORGS.length} 个组织</div></div>
       <div class="panel-body"><ul class="idx">${cityList.map(c=>
         `<li data-city="${c.key}"><span class="nm">${esc(c.zh)}</span><span class="cc">${esc(c.cc)}</span><span class="ct">${c.orgs.length}</span></li>`
       ).join('')}</ul>
