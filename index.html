@@ -303,6 +303,7 @@ const VB = {x:170,y:297.7,w:1180,h:641.8};
 const svg = document.getElementById('map');
 const vp = document.getElementById('viewport');
 const pinsG = document.getElementById('pins');
+const nodesG = document.getElementById('nodes');
 const tip = document.getElementById('tip');
 const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -372,10 +373,11 @@ document.querySelectorAll('.pin').forEach(p=>pinEls[p.dataset.city]=p);
 const basePts = cityList.map(c=>{ const [x,y]=project(c.lat,c.lon); return {key:c.key,x,y}; });
 function apply(){
   const t = `translate(${tx} ${ty}) scale(${k})`;
-  vp.setAttribute('transform',t); pinsG.setAttribute('transform',t);
+  vp.setAttribute('transform',t); pinsG.setAttribute('transform',t); nodesG.setAttribute('transform',t);
   const unit = VB.w / Math.max(1, svg.getBoundingClientRect().width);
   const minD = (19*unit)/k;
   const pts = basePts.map(p=>({...p,dx:0,dy:0}));
+  if(nodesShown) nodeEls.forEach(o=>pts.push({key:'node:'+o.key,x:o.x,y:o.y,isNode:true,el:o.el,dx:0,dy:0}));
   for(let it=0; it<26; it++){
     let moved=false;
     for(let i=0;i<pts.length;i++) for(let j=i+1;j<pts.length;j++){
@@ -391,10 +393,9 @@ function apply(){
     if(!moved) break;
   }
   pts.forEach(p=>{
-    const el = pinEls[p.key]; if(!el) return;
+    const el = p.isNode ? p.el : pinEls[p.key]; if(!el) return;
     el.setAttribute('transform',`translate(${(p.x+p.dx).toFixed(1)} ${(p.y+p.dy).toFixed(1)}) scale(${(1/k).toFixed(4)})`);
   });
-  nodeEls.forEach(o=>o.el.setAttribute('transform',`translate(${o.x.toFixed(1)} ${o.y.toFixed(1)}) scale(${(1/k).toFixed(4)})`));
   updateScale();
 }
 function updateScale(){
@@ -494,9 +495,9 @@ NODES.forEach(n=>{
   g.setAttribute('tabindex','0');
   g.setAttribute('role','button');
   g.setAttribute('aria-label', n.zh + '，原稿所述通道节点');
-  g.innerHTML = `<rect x="-4.8" y="-4.8" width="9.6" height="9.6" transform="rotate(45)"></rect><text class="lbl" y="12">${esc(n.zh)}</text>`;
+  g.innerHTML = `<rect x="-6" y="-6" width="12" height="12" transform="rotate(45)"></rect><text class="lbl" y="12">${esc(n.zh)}</text>`;
   document.getElementById('nodes').appendChild(g);
-  nodeEls.push({el:g,x,y});
+  nodeEls.push({el:g,x,y,key:n.key});
   g.addEventListener('click', e=>{ e.stopPropagation(); select(null); renderNode(n.key); flyToPoint(n.lat,n.lon,4.2); });
   g.addEventListener('keydown', e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); select(null); renderNode(n.key); flyToPoint(n.lat,n.lon,4.2); } });
 });
@@ -590,12 +591,13 @@ chips.innerHTML = REGIONS.map(([v,label])=>{
   const n = v==='all'? ORGS.length : ORGS.filter(o=>o.sites.some(s=>CITIES[s.city]?.region===v)).length;
   return `<button class="chip" data-region="${v}" aria-pressed="${v==='all'}">${label}<span class="c">${n}</span></button>`;
 }).join('');
-let region='all';
+let region='all', nodesShown=false;
 chips.addEventListener('click', e=>{
   const b = e.target.closest('.chip'); if(!b) return;
   region = b.dataset.region;
   chips.querySelectorAll('.chip').forEach(c=>c.setAttribute('aria-pressed', String(c.dataset.region===region)));
   const showNodes = (region==='tr');
+  nodesShown = showNodes;
   document.getElementById('nodes').style.display = showNodes ? '' : 'none';
   document.getElementById('leg-node').style.display = showNodes ? '' : 'none';
   document.querySelectorAll('.nodes-sec').forEach(el=>el.style.display = showNodes ? '' : 'none');
