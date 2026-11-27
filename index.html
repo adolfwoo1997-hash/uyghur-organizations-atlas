@@ -254,7 +254,7 @@ footer li{padding:4px 0;border-bottom:1px solid rgba(231,237,233,.09);font-size:
     <section class="ledger" id="syria-sec" aria-label="东突叙利亚坐标汇总">
       <div class="ledger-head">
         <h2>东突叙利亚坐标汇总</h2>
-        <p>按你提供的清单原样收录：吉斯尔舒古尔一带的指挥中枢、家属安置区 1–11、公墓与过境点，共 14 个点位。原始值为度分秒，右侧换算为十进制度便于比对。清单中「指挥中枢」与「家属安置区 1」坐标完全相同，已按原样保留并在备注标出；这些是坐标点，不是经核实的机构或设施。</p>
+        
       </div>
       <div class="table-scroll">
         <table>
@@ -281,7 +281,7 @@ footer li{padding:4px 0;border-bottom:1px solid rgba(231,237,233,.09);font-size:
           <th style="width:220px">地点</th>
           <th style="width:120px">行政级别</th>
           <th style="width:200px">坐标</th>
-          <th>原稿表述</th>
+          <th>说明</th>
         </tr></thead>
         <tbody id="nbody"></tbody>
       </table>
@@ -501,7 +501,7 @@ document.querySelectorAll('.pin').forEach(p=>{
 });
 
 
-/* ---------- nodes (Turkey, from 口播稿) ---------- */
+/* ---------- nodes (Turkey) ---------- */
 const NODES = [{"key":"node0","zh":"哈塔伊省","lat":36.2,"lon":36.16,"prec":"省级","note":"叙土边境省份，西线过境段省级节点"},{"key":"node1","zh":"雷伊汉勒","lat":36.27,"lon":36.57,"prec":"县级","note":"哈塔伊省边境县，边贸与带路为当地营生"},{"key":"node2","zh":"泽伊廷布尔努","lat":40.99,"lon":28.91,"prec":"区级","note":"伊斯坦布尔欧洲侧区，维吾尔聚居区之一"},{"key":"node3","zh":"阿克萨赖","lat":41.0085,"lon":28.941,"prec":"城市级","note":"伊斯坦布尔法提赫区街区"}];
 const NS = 'http://www.w3.org/2000/svg';
 const nodeEls = [];
@@ -512,7 +512,7 @@ NODES.forEach(n=>{
   g.dataset.node = n.key;
   g.setAttribute('tabindex','0');
   g.setAttribute('role','button');
-  g.setAttribute('aria-label', n.zh + '，原稿所述通道节点');
+  g.setAttribute('aria-label', n.zh + '，通道节点');
   g.innerHTML = `<rect x="-6" y="-6" width="12" height="12" transform="rotate(45)"></rect><text class="lbl" y="12">${esc(n.zh)}</text>`;
   document.getElementById('nodes').appendChild(g);
   nodeEls.push({el:g,x,y,key:n.key});
@@ -538,7 +538,7 @@ function renderNode(key){
 }
 
 /* ---------- panel ---------- */
-const badgeText = {own:'专属场所', suite:'写字楼套间', mail:'邮政信箱', city:'城市级', home:'住宅/注册地址', unk:'待核实'};
+const badgeText = {own:'专属场所', suite:'写字楼套间', mail:'邮政信箱', city:'城市级', home:'住宅/注册地址', unk:'未注明'};
 const panel = document.getElementById('panel');
 function renderPanel(key){
   if(!key){
